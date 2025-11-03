@@ -18,6 +18,7 @@
 /* Function prototypes */
 
 void processLine(std::string line, Program &program, EvalState &state);
+static bool g_shouldQuit = false;
 
 /* Main program */
 
@@ -32,6 +33,7 @@ int main() {
             if (input.empty())
                 continue;
             processLine(input, program, state);
+            if (g_shouldQuit) break;
         } catch (ErrorException &ex) {
             std::cout << ex.getMessage() << std::endl;
         }
@@ -152,7 +154,8 @@ void processLine(std::string line, Program &program, EvalState &state) {
         return;
     }
     if (cmd == "QUIT") {
-        exit(0);
+        g_shouldQuit = true;
+        return;
     }
     if (cmd == "END" || cmd == "GOTO" || cmd == "IF") {
         error("SYNTAX ERROR");
