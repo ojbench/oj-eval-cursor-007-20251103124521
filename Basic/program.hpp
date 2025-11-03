@@ -12,6 +12,7 @@
 #include <vector>
 #include <set>
 #include <unordered_map>
+#include <map>
 #include "statement.hpp"
 
 
@@ -140,13 +141,29 @@ public:
 
     int getNextLineNumber(int lineNumber);
 
-    //more func to add
-    //todo
+    // Additional helpers for control flow and queries
+    bool hasLine(int lineNumber) const;
+
+    // Control flow requests set by statements during RUN
+    void requestJump(int lineNumber);
+    bool hasPendingJump() const;
+    int getPendingJump() const;
+    void clearPendingJump();
+
+    void requestStop();
+    bool shouldStop() const;
+    void clearStop();
 
 private:
 
-    // Fill this in with whatever types and instance variables you need
-    //todo
+    // Source lines and parsed statements keyed by line number (ordered)
+    std::map<int, std::string> sourceLinesByNumber;
+    std::map<int, Statement *> parsedByNumber;
+
+    // Control flow flags used during RUN
+    bool jumpPending = false;
+    int jumpTarget = -1;
+    bool stopRequested = false;
 };
 
 #endif

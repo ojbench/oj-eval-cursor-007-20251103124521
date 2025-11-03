@@ -74,15 +74,75 @@ public:
 };
 
 
-/*
- * The remainder of this file must consists of subclass
- * definitions for the individual statement forms.  Each of
- * those subclasses must define a constructor that parses a
- * statement from a scanner and a method called execute,
- * which executes that statement.  If the private data for
- * a subclass includes data allocated on the heap (such as
- * an Expression object), the class implementation must also
- * specify its own destructor method to free that memory.
- */
+// REM statement: comment (no-op)
+class RemStatement : public Statement {
+public:
+    explicit RemStatement(TokenScanner &scanner);
+    ~RemStatement() override = default;
+    void execute(EvalState &state, Program &program) override;
+private:
+    std::string comment;
+};
+
+// LET statement: assignment expression
+class LetStatement : public Statement {
+public:
+    explicit LetStatement(TokenScanner &scanner);
+    ~LetStatement() override;
+    void execute(EvalState &state, Program &program) override;
+private:
+    Expression *exp = nullptr;
+};
+
+// PRINT statement
+class PrintStatement : public Statement {
+public:
+    explicit PrintStatement(TokenScanner &scanner);
+    ~PrintStatement() override;
+    void execute(EvalState &state, Program &program) override;
+private:
+    Expression *exp = nullptr;
+};
+
+// INPUT statement
+class InputStatement : public Statement {
+public:
+    explicit InputStatement(TokenScanner &scanner);
+    ~InputStatement() override = default;
+    void execute(EvalState &state, Program &program) override;
+private:
+    std::string varName;
+};
+
+// END statement
+class EndStatement : public Statement {
+public:
+    EndStatement() = default;
+    ~EndStatement() override = default;
+    void execute(EvalState &state, Program &program) override;
+};
+
+// GOTO statement
+class GotoStatement : public Statement {
+public:
+    explicit GotoStatement(TokenScanner &scanner);
+    ~GotoStatement() override = default;
+    void execute(EvalState &state, Program &program) override;
+private:
+    int targetLine = -1;
+};
+
+// IF ... THEN ... statement
+class IfStatement : public Statement {
+public:
+    explicit IfStatement(TokenScanner &scanner);
+    ~IfStatement() override;
+    void execute(EvalState &state, Program &program) override;
+private:
+    std::string lhsStr;
+    std::string rhsStr;
+    std::string op; // one of "<", ">", "="
+    int targetLine = -1;
+};
 
 #endif

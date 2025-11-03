@@ -17,48 +17,110 @@ Program::Program() = default;
 Program::~Program() = default;
 
 void Program::clear() {
-    // Replace this stub with your own code
-    //todo
+    // Delete all parsed statements
+    for (auto &entry : parsedByNumber) {
+        delete entry.second;
+    }
+    parsedByNumber.clear();
+    sourceLinesByNumber.clear();
+    clearPendingJump();
+    clearStop();
 }
 
 void Program::addSourceLine(int lineNumber, const std::string &line) {
-    // Replace this stub with your own code
-    //todo
+    // Replace or insert source line; delete old parsed statement if replacing
+    if (sourceLinesByNumber.find(lineNumber) != sourceLinesByNumber.end()) {
+        // replacing existing line: drop old parsed statement
+        auto it = parsedByNumber.find(lineNumber);
+        if (it != parsedByNumber.end()) {
+            delete it->second;
+            parsedByNumber.erase(it);
+        }
+    }
+    sourceLinesByNumber[lineNumber] = line;
 }
 
 void Program::removeSourceLine(int lineNumber) {
-    // Replace this stub with your own code
-    //todo
+    auto it = parsedByNumber.find(lineNumber);
+    if (it != parsedByNumber.end()) {
+        delete it->second;
+        parsedByNumber.erase(it);
+    }
+    sourceLinesByNumber.erase(lineNumber);
 }
 
 std::string Program::getSourceLine(int lineNumber) {
-    // Replace this stub with your own code
-    //todo
+    auto it = sourceLinesByNumber.find(lineNumber);
+    if (it == sourceLinesByNumber.end()) return "";
+    return it->second;
 }
 
 void Program::setParsedStatement(int lineNumber, Statement *stmt) {
-    // Replace this stub with your own code
-    //todo
+    if (sourceLinesByNumber.find(lineNumber) == sourceLinesByNumber.end()) {
+        // No such line
+        delete stmt;
+        error("SYNTAX ERROR");
+    }
+    auto it = parsedByNumber.find(lineNumber);
+    if (it != parsedByNumber.end()) {
+        delete it->second;
+        it->second = stmt;
+    } else {
+        parsedByNumber.emplace(lineNumber, stmt);
+    }
 }
 
 //void Program::removeSourceLine(int lineNumber) {
 
 Statement *Program::getParsedStatement(int lineNumber) {
-   // Replace this stub with your own code
-   //todo
+   auto it = parsedByNumber.find(lineNumber);
+   if (it == parsedByNumber.end()) return nullptr;
+   return it->second;
 }
 
 int Program::getFirstLineNumber() {
-    // Replace this stub with your own code
-    //todo
+    if (sourceLinesByNumber.empty()) return -1;
+    return sourceLinesByNumber.begin()->first;
 }
 
 int Program::getNextLineNumber(int lineNumber) {
-    // Replace this stub with your own code
-    //todo
+    auto it = sourceLinesByNumber.upper_bound(lineNumber);
+    if (it == sourceLinesByNumber.end()) return -1;
+    return it->first;
 }
 
-//more func to add
-//todo
+bool Program::hasLine(int lineNumber) const {
+    return sourceLinesByNumber.find(lineNumber) != sourceLinesByNumber.end();
+}
+
+void Program::requestJump(int lineNumber) {
+    jumpPending = true;
+    jumpTarget = lineNumber;
+}
+
+bool Program::hasPendingJump() const {
+    return jumpPending;
+}
+
+int Program::getPendingJump() const {
+    return jumpTarget;
+}
+
+void Program::clearPendingJump() {
+    jumpPending = false;
+    jumpTarget = -1;
+}
+
+void Program::requestStop() {
+    stopRequested = true;
+}
+
+bool Program::shouldStop() const {
+    return stopRequested;
+}
+
+void Program::clearStop() {
+    stopRequested = false;
+}
 
 
