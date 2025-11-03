@@ -14,7 +14,9 @@
 
 Program::Program() = default;
 
-Program::~Program() = default;
+Program::~Program() {
+    clear();
+}
 
 void Program::clear() {
     // Delete all parsed statements
